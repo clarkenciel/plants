@@ -72,6 +72,12 @@ struct Plant {
     expiration: DateTime<Utc>,
 }
 
+impl Plant {
+    fn is_dead(&self, time: &DateTime<Utc>) -> bool {
+        self.expiration >= *time
+    }
+}
+
 impl Display for Plant {
     fn fmt(&self, fmtr: &mut fmt::Formatter) -> fmt::Result {
         let expr = [self.expression];
