@@ -76,7 +76,11 @@ impl Display for Plant {
     fn fmt(&self, fmtr: &mut fmt::Formatter) -> fmt::Result {
         let expr = [self.expression];
         let printable_expr = str::from_utf8(&expr).unwrap();
-        write!(fmtr, "{}: {}", self.dna, printable_expr)
+        write!(
+            fmtr,
+            "<Plant dna={}, phe={}, exp={}>",
+            self.dna, printable_expr, self.expiration
+        )
     }
 }
 
