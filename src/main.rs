@@ -3,16 +3,18 @@ use rand::{self, seq::SliceRandom, Rng};
 use std::cell::RefCell;
 use std::cmp;
 use std::fmt::{self, Display};
-use std::io;
+use std::fs;
+use std::io::{self, prelude::*};
 use std::str;
 
 fn main() -> io::Result<()> {
-    let words = vec!["hello", "sally", "maye"];
-
+    let words = read_words()?;
     let mut rng = rand::thread_rng();
 
+    let num_plants = 10;
     let mut plants: Vec<Plant> = words
-        .iter()
+        .as_slice()
+        .choose_multiple(&mut rng, num_plants)
         .map(|word| plant_from_word(&mut rng, word))
         .collect();
 
@@ -36,6 +38,13 @@ fn main() -> io::Result<()> {
     }
 
     Ok(())
+}
+
+fn read_words() -> io::Result<Vec<String>> {
+    let mut file = fs::File::open("/usr/share/dict/usa")?;
+    let mut contents = String::new();
+    file.read_to_string(&mut contents)?;
+    Ok(contents.split("\n").map(|s| s.to_owned()).collect())
 }
 
 fn plant_from_word<R: Rng>(rng: &mut R, word: &str) -> Plant {
