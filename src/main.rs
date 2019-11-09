@@ -83,7 +83,7 @@ struct Plant {
 
 impl Plant {
     fn is_dead(&self, time: &DateTime<Utc>) -> bool {
-        self.expiration >= *time
+        self.expiration <= *time
     }
 }
 
