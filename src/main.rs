@@ -6,6 +6,8 @@ use std::fmt::{self, Display};
 use std::fs;
 use std::io::{self, prelude::*};
 use std::str;
+use std::thread;
+use std::time;
 
 fn main() -> io::Result<()> {
     let words = read_words()?;
@@ -35,6 +37,7 @@ fn main() -> io::Result<()> {
 
         let now = Utc::now();
         plants.retain(|plant| !plant.is_dead(&now));
+        thread::sleep(time::Duration::from_millis(500));
     }
 
     Ok(())
