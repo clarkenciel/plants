@@ -24,9 +24,10 @@ fn main() -> io::Result<()> {
     while plants.len() > 1 {
         let now = Utc::now();
         println!("{now:-^width$}", now = format!("{}", now), width = 70);
-        for (i, plant) in plants.iter().enumerate() {
-            println!("{}: {}", i, plant);
+        for plant in plants.iter() {
+            print!("{}", plant.expression);
         }
+        println!();
 
         let new_plants = rng.gen_range(0, 3);
         for _ in 0..new_plants {
