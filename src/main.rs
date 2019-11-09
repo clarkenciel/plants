@@ -133,7 +133,7 @@ impl<R: Rng> Breeder<Plant> for RandomBreeder<R> {
 }
 
 fn random_date_after<R: Rng>(rng: &mut R, dt: &DateTime<Utc>) -> DateTime<Utc> {
-    let offset = rng.gen_range(1, 500);
+    let offset = rng.gen_range(1, 5000);
     let duration = Duration::milliseconds(offset);
     *dt + duration
 }
