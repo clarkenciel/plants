@@ -30,12 +30,8 @@ fn main() -> io::Result<()> {
             plants.push(new_plant);
         }
 
-        let kill_plants = rng.gen_range(0, cmp::min(3, plants.len()));
-        for _ in 0..kill_plants {
-            let tot_plants = plants.len();
-            let kill_idx = rng.gen_range(0, tot_plants);
-            plants.remove(kill_idx);
-        }
+        let now = Utc::now();
+        plants.retain(|plant| !plant.is_dead(&now));
     }
 
     Ok(())
