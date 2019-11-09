@@ -15,6 +15,7 @@ fn main() -> io::Result<()> {
 
     let num_plants = 50;
     let mut plants: Vec<Plant> = words
+    let mut plants: Vec<Plant<rand::rngs::ThreadRng>> = words
         .as_slice()
         .choose_multiple(&mut rng, num_plants)
         .map(|word| plant_from_word(&mut rng, word))
@@ -31,8 +32,19 @@ fn main() -> io::Result<()> {
 
         let new_plants = rng.gen_range(0, num_plants / 2);
         for _ in 0..new_plants {
-            let parents: Vec<&Plant> = plants.as_slice().choose_multiple(&mut rng, 2).collect();
-            let new_plant = breeder.breed(parents[0], parents[1]);
+            let new_plant = if *[true, false].choose(&mut rng).unwrap() {
+                let parents: Vec<&Plant<rand::rngs::ThreadRng>> =
+                    plants.as_slice().choose_multiple(&mut rng, 2).collect();
+                breeder.breed(parents[0], parents[1])
+            } else {
+                let mut children = plants
+                    .as_slice()
+                    .choose(&mut rng)
+                    .unwrap()
+                    .expand();
+                let child_idx = rng.gen_range(0, children.len());
+                children.remove(child_idx)
+            };
             plants.push(new_plant);
         }
 
@@ -50,15 +62,11 @@ fn read_words() -> io::Result<Vec<String>> {
     Ok(contents.split("\n").map(|s| s.to_owned()).collect())
 }
 
-fn plant_from_word<R: Rng>(rng: &mut R, word: &str) -> Plant {
+fn plant_from_word<R: Rng + Clone>(rng: &mut R, word: &str) -> Plant<R> {
     let dna = Dna(word.to_owned());
     let expiration = random_date_after(rng, &Utc::now());
     let expression = select_expression(rng, &dna);
-    Plant {
-        dna,
-        expiration,
-        expression,
-    }
+    Plant::new(dna, expiration, expression, rng.clone())
 }
 
 struct Dna(String);
@@ -75,19 +83,39 @@ impl Display for Dna {
     }
 }
 
-struct Plant {
+struct Plant<R>
+where
+    R: Rng,
+{
     dna: Dna,
     expression: String,
     expiration: DateTime<Utc>,
+    rng: RefCell<R>,
 }
 
-impl Plant {
+impl<R: Rng + Clone> Plant<R> {
+    fn new(dna: Dna, expiration: DateTime<Utc>, expression: String, rng: R) -> Self {
+        Plant {
+            dna,
+            expiration,
+            expression,
+            rng: RefCell::new(rng),
+        }
+    }
+
     fn is_dead(&self, time: &DateTime<Utc>) -> bool {
         self.expiration <= *time
     }
+
+    fn expand(&self) -> Vec<Self> {
+        let mut rng = self.rng.borrow_mut();
+        (0..4)
+            .map(|_| plant_from_word(&mut *rng, &*self.dna.0))
+            .collect()
+    }
 }
 
-impl Display for Plant {
+impl<R: Rng> Display for Plant<R> {
     fn fmt(&self, fmtr: &mut fmt::Formatter) -> fmt::Result {
         write!(
             fmtr,
@@ -118,17 +146,13 @@ impl<R: Rng> RandomBreeder<R> {
     }
 }
 
-impl<R: Rng> Breeder<Plant> for RandomBreeder<R> {
-    fn breed(&self, a: &Plant, b: &Plant) -> Plant {
+impl<PR: Rng + Clone, R: Rng> Breeder<Plant<PR>> for RandomBreeder<R> {
+    fn breed(&self, a: &Plant<PR>, b: &Plant<PR>) -> Plant<PR> {
         let dna = a.dna.combine(&b.dna);
         let mut rng = self.rng.borrow_mut();
         let expression = select_expression(&mut *rng, &dna);
         let expiration = random_date_after(&mut *rng, cmp::min(&a.expiration, &b.expiration));
-        Plant {
-            dna,
-            expression,
-            expiration,
-        }
+        Plant::new(dna, expiration, expression, (*a.rng.borrow()).clone())
     }
 }
 
