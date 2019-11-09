@@ -93,8 +93,10 @@ impl Display for Plant {
         let printable_expr = str::from_utf8(&expr).unwrap();
         write!(
             fmtr,
-            "<Plant dna={}, phe={}, exp={}>",
-            self.dna, printable_expr, self.expiration
+            "<Plant phe={phe}, exp={exp}, dna={dna}>",
+            dna = self.dna,
+            phe = printable_expr,
+            exp = self.expiration
         )
     }
 }
