@@ -13,7 +13,7 @@ fn main() -> io::Result<()> {
     let words = read_words()?;
     let mut rng = rand::thread_rng();
 
-    let num_plants = 10;
+    let num_plants = 50;
     let mut plants: Vec<Plant> = words
         .as_slice()
         .choose_multiple(&mut rng, num_plants)
@@ -29,7 +29,7 @@ fn main() -> io::Result<()> {
         }
         println!();
 
-        let new_plants = rng.gen_range(0, 3);
+        let new_plants = rng.gen_range(0, num_plants / 2);
         for _ in 0..new_plants {
             let parents: Vec<&Plant> = plants.as_slice().choose_multiple(&mut rng, 2).collect();
             let new_plant = breeder.breed(parents[0], parents[1]);
