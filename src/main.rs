@@ -18,7 +18,8 @@ fn main() -> io::Result<()> {
 
     let breeder = RandomBreeder::new(rand::thread_rng());
     while plants.len() > 1 {
-        println!("{:-^repeat$}", "-", repeat=10);
+        let now = Utc::now();
+        println!("{now:-^width$}", now = format!("{}", now), width = 70);
         for (i, plant) in plants.iter().enumerate() {
             println!("{}: {}", i, plant);
         }
