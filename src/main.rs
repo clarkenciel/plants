@@ -35,7 +35,6 @@ fn main() -> io::Result<()> {
             plants.push(new_plant);
         }
 
-        let now = Utc::now();
         plants.retain(|plant| !plant.is_dead(&now));
         thread::sleep(time::Duration::from_millis(500));
     }
