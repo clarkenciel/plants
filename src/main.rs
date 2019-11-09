@@ -76,7 +76,7 @@ impl Display for Dna {
 
 struct Plant {
     dna: Dna,
-    expression: u8,
+    expression: String,
     expiration: DateTime<Utc>,
 }
 
@@ -88,13 +88,11 @@ impl Plant {
 
 impl Display for Plant {
     fn fmt(&self, fmtr: &mut fmt::Formatter) -> fmt::Result {
-        let expr = [self.expression];
-        let printable_expr = str::from_utf8(&expr).unwrap();
         write!(
             fmtr,
             "<Plant phe={phe}, exp={exp}, dna={dna}>",
             dna = self.dna,
-            phe = printable_expr,
+            phe = self.expression,
             exp = self.expiration
         )
     }
@@ -139,6 +137,7 @@ fn random_date_after<R: Rng>(rng: &mut R, dt: &DateTime<Utc>) -> DateTime<Utc> {
     *dt + duration
 }
 
-fn select_expression<R: Rng>(rng: &mut R, dna: &Dna) -> u8 {
-    dna.0.as_bytes().choose(rng).unwrap().clone()
+fn select_expression<R: Rng>(rng: &mut R, dna: &Dna) -> String {
+    let c = dna.0.as_bytes().choose(rng).unwrap();
+    String::from_utf8(vec![*c]).unwrap()
 }
