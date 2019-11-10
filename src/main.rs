@@ -2,18 +2,22 @@ use chrono::{DateTime, Duration, Utc};
 use rand::{self, seq::SliceRandom, Rng};
 use std::cell::RefCell;
 use std::cmp;
+use std::env::args;
 use std::fmt::{self, Display};
 use std::fs;
 use std::io::{self, prelude::*};
 use std::str;
 use std::thread;
 use std::time;
+use std::usize;
 
 fn main() -> io::Result<()> {
+    let args: Vec<String> = args().collect();
     let words = read_words()?;
     let mut rng = rand::thread_rng();
 
-    let num_plants = 50;
+    let num_plants_arg = args.get(1).expect("First argument must be a valid whole number");
+    let num_plants = usize::from_str_radix(num_plants_arg, 10).expect("First argument must be a valid whole number");
     let mut plants: Vec<Plant> = words
         .as_slice()
         .choose_multiple(&mut rng, num_plants)
